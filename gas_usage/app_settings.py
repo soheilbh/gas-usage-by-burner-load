@@ -8,7 +8,7 @@ from datetime import date
 # ---------------------------------------------------------------------------
 # App version (shown under the title).
 # ---------------------------------------------------------------------------
-APP_VERSION = "1.0"
+APP_VERSION = "1.1"
 
 # ---------------------------------------------------------------------------
 # Default calibration factor: gas_usage_est = K * burner_load_hourly (no intercept).
