@@ -116,7 +116,7 @@ s_run and fan speeds are **not** cleaned; they are used as-is for the operationa
 
 Comparison: **total estimated gas** (sum of K×load×(op_min/60)) vs **total measured gas** from Influx over the same period (no extra filter). Run locally only; **do not publish** actual m³ or dates (confidential).
 
-**Script (internal use):** `python -m gas_usage_app.check_est_vs_actual --multi` (and `--all-hours` for a single period). Output stays on your machine.
+**Script (internal use):** `python check_est_vs_actual.py --multi` (and `--all-hours` for a single period). Output stays on your machine.
 
 **Typical outcome:** On 1–7 month periods, percentage error is usually in the **about −1% to +4%** range; longer spans often sit around **+1–3%**. Exact figures depend on site and period and should not be shared in docs.
 
@@ -140,7 +140,7 @@ Comparison: **total estimated gas** (sum of K×load×(op_min/60)) vs **total mea
 | **influx_queries.py** | All Influx queries (1m fetch, gas raw, etc.). |
 | **config.py** | InfluxConfig. |
 | **app_settings.py** | APP_VERSION, DEFAULT_K, DEFAULT_GAS_PRICE_EUR_PER_M3, CALIBRATION_START_DATE, CALIBRATION_END_DATE. |
-| **run.py** | Entry: `streamlit run gas_usage_app/app.py --server.port=8502`. |
+| **run.py** | Entry: `streamlit run app.py --server.port=8502`. |
 
 ---
 

@@ -7,7 +7,7 @@ import os
 import sys
 from datetime import datetime, timedelta
 
-_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_ROOT = os.path.dirname(os.path.abspath(__file__))
 if _ROOT not in sys.path:
     sys.path.insert(0, _ROOT)
 try:
@@ -19,17 +19,17 @@ except ImportError:
 import pandas as pd
 import streamlit as st
 
-from gas_usage_app.config import InfluxConfig
-from gas_usage_app.app_settings import (
+from config import InfluxConfig
+from app_settings import (
     APP_VERSION,
     CALIBRATION_END_DATE,
     CALIBRATION_START_DATE,
     DEFAULT_GAS_PRICE_EUR_PER_M3,
     DEFAULT_K,
 )
-from gas_usage_app.find_k_pipeline import run_find_k
-from gas_usage_app.full_cleaning_pipeline import run_pipeline
-from gas_usage_app.processing import apply_gas_model
+from find_k_pipeline import run_find_k
+from full_cleaning_pipeline import run_pipeline
+from processing import apply_gas_model
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

@@ -1,6 +1,6 @@
 """
 One-off: query Influx directly for gas in the same period and show what we get.
-Run from repo root: python -m gas_usage_app.influx_gas_check
+Run from repo root: python influx_gas_check.py
 Delete after use.
 """
 import os
@@ -8,7 +8,7 @@ import sys
 from datetime import datetime
 
 if __name__ == "__main__":
-    _root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    _root = os.path.dirname(os.path.abspath(__file__))
     sys.path.insert(0, _root)
 try:
     from dotenv import load_dotenv
@@ -17,8 +17,8 @@ except ImportError:
     pass
 
 import pandas as pd
-from gas_usage_app.config import InfluxConfig
-from gas_usage_app.influx_queries import query_energy_gas_raw
+from config import InfluxConfig
+from influx_queries import query_energy_gas_raw
 
 
 def main():

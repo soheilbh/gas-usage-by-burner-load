@@ -10,14 +10,14 @@
 
 ```bash
 # From repo root
-pip install -r gas_usage_app/requirements.txt
-streamlit run gas_usage_app/app.py
+pip install -r requirements.txt
+streamlit run app.py
 ```
 
 Or run on port 8502:
 
 ```bash
-python gas_usage_app/run.py
+python run.py
 ```
 
 ---

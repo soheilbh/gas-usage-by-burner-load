@@ -10,7 +10,7 @@ from typing import Optional, Tuple
 import pandas as pd
 import requests
 
-from .config import InfluxConfig
+from config import InfluxConfig
 
 logger = logging.getLogger(__name__)
 
