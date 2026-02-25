@@ -8,6 +8,8 @@ services:
     container_name: gas-usage-app
     ports:
       - "8090:8501"
+    volumes:
+      - gas-usage-data:/app/data
     environment:
       - INFLUXDB_HOST=${INFLUXDB_HOST:-localhost}
       - INFLUXDB_PORT=${INFLUXDB_PORT:-8087}
@@ -17,3 +19,6 @@ services:
       - INFLUXDB_PASSWORD=${INFLUXDB_PASSWORD:-}
       - INFLUXDB_SSL=${INFLUXDB_SSL:-false}
     restart: unless-stopped
+
+volumes:
+  gas-usage-data:

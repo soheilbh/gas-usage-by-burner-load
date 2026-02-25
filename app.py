@@ -27,14 +27,17 @@ from gas_usage.app_settings import (
 from gas_usage.find_k_pipeline import run_find_k
 from gas_usage.full_cleaning_pipeline import run_pipeline
 from gas_usage.processing import apply_gas_model
+from gas_usage.user_prefs import get_effective_default_k, save_default_k
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+_APP_ROOT = os.path.dirname(os.path.abspath(__file__))
+
 st.set_page_config(page_title="Gas usage from burner load (Farmsum)", layout="wide")
 
 if "k" not in st.session_state:
-    st.session_state["k"] = DEFAULT_K
+    st.session_state["k"] = get_effective_default_k(_APP_ROOT, DEFAULT_K)
 if "result_df" not in st.session_state:
     st.session_state["result_df"] = None
 if "hourly_raw" not in st.session_state:
@@ -105,6 +108,7 @@ def run_calibrate(cal_start, cal_end):
     if k_fit is None:
         return False, "Could not calibrate: no data or not enough overlap."
     st.session_state["k"] = k_fit
+    st.session_state["k_input"] = k_fit  # sync widget so it shows new K instead of old value
     st.session_state["calibration_metrics"] = metrics
     compare_df = hourly[["burner_load_hourly"]].copy()
     compare_df["gas_estimated_hourly"] = compare_df["burner_load_hourly"] * k_fit
@@ -116,6 +120,7 @@ def run_calibrate(cal_start, cal_end):
         st.session_state["result_df"] = apply_gas_model(
             st.session_state["hourly_raw"], k_fit, st.session_state.get("gas_price", 0.0), op_min_col="op_min"
         )
+    st.session_state["calibration_offer_save_default"] = True
     return True, None
 
 
@@ -129,11 +134,43 @@ def _parse_date(s: str):
         return None
 
 
+@st.dialog("Save as default?", width="small")
+def save_default_dialog():
+    """Ask user whether to persist the calibrated K as default for new sessions."""
+    k = st.session_state.get("k", 0)
+    st.markdown(f"Calibration done. **K = {k:.2f}**")
+    st.caption("Save this K as the default for new sessions?")
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("Yes, save as default", type="primary", use_container_width=True):
+            if save_default_k(_APP_ROOT, k):
+                st.session_state.pop("calibration_offer_save_default", None)
+                st.rerun()
+            else:
+                st.error("Could not save (check write permission for data/).")
+    with col2:
+        if st.button("No", use_container_width=True):
+            st.session_state.pop("calibration_offer_save_default", None)
+            st.rerun()
+
+
+def _init_cal_dialog_dates():
+    """Ensure calibration dialog date keys exist; use app defaults as initial value."""
+    if "cal_dialog_start" not in st.session_state:
+        st.session_state["cal_dialog_start"] = CALIBRATION_START_DATE.isoformat()
+    if "cal_dialog_end" not in st.session_state:
+        st.session_state["cal_dialog_end"] = CALIBRATION_END_DATE.isoformat()
+
+
 @st.dialog("Calibrate K", width="medium")
 def calibrate_dialog():
+    _init_cal_dialog_dates()
     st.caption("Pick a period with measured gas in InfluxDB. K will be fitted from burner_load vs gas.")
-    from_str = st.text_input("From (YYYY-MM-DD)", value=CALIBRATION_START_DATE.isoformat(), key="cal_dialog_start")
-    to_str = st.text_input("To (YYYY-MM-DD)", value=CALIBRATION_END_DATE.isoformat(), key="cal_dialog_end")
+    st.text_input("From (YYYY-MM-DD)", key="cal_dialog_start")
+    st.text_input("To (YYYY-MM-DD)", key="cal_dialog_end")
+    # Read from session state (source of truth; text_input updates it)
+    from_str = st.session_state.get("cal_dialog_start", "")
+    to_str = st.session_state.get("cal_dialog_end", "")
     cal_start_date = _parse_date(from_str)
     cal_end_date = _parse_date(to_str)
     if cal_start_date is None:
@@ -142,10 +179,19 @@ def calibrate_dialog():
         st.warning("To: use YYYY-MM-DD (e.g. 2024-09-15).")
     cal_start = datetime.combine(cal_start_date, datetime.min.time()) if cal_start_date else None
     cal_end = datetime.combine(cal_end_date, datetime.max.time()) if cal_end_date else None
+    if cal_start and cal_end:
+        st.caption(f"→ Calibration period: **{cal_start.date()}** to **{cal_end.date()}**")
     col1, col2 = st.columns([2, 1])
     with col1:
         if st.button("Run calibration", type="primary", use_container_width=True):
-            ok, msg = run_calibrate(cal_start, cal_end)
+            # Use session state directly so user-edited dates are definitely passed
+            fs = st.session_state.get("cal_dialog_start", "")
+            ts = st.session_state.get("cal_dialog_end", "")
+            cs = _parse_date(fs)
+            ce = _parse_date(ts)
+            start = datetime.combine(cs, datetime.min.time()) if cs else None
+            end = datetime.combine(ce, datetime.max.time()) if ce else None
+            ok, msg = run_calibrate(start, end)
             if ok:
                 st.rerun()
             else:
@@ -199,7 +245,9 @@ with tool4:
     st.markdown("**Actions**")
     if st.button("Run", type="primary", use_container_width=True):
         run_query()
-    if st.button("Calibrate k", use_container_width=True):
+    if st.session_state.get("calibration_offer_save_default"):
+        save_default_dialog()
+    elif st.button("Calibrate k", use_container_width=True):
         calibrate_dialog()
     if st.button("Reset", use_container_width=True):
         st.session_state["result_df"] = None
