@@ -1,9 +1,8 @@
-"""Entry point to run the Streamlit app. Run from repo root: python run.py"""
+"""Run Streamlit app on port 8502. From repo root: python scripts/run.py"""
 import os
 import sys
 
-# Ensure repo root is on path and cwd when running from any location
-_REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
+_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(_REPO_ROOT)
 sys.path.insert(0, _REPO_ROOT)
 

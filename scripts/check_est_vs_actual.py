@@ -1,12 +1,10 @@
 """
 One-off script: for a given period, run the pipeline (no UI), then print
 total estimated gas (K × burner_load) vs total actual gas from InfluxDB.
-Delete this file after use.
 
 Usage (from repo root):
-  python check_est_vs_actual.py
-  # or with custom range:
-  python check_est_vs_actual.py --from 2024-02-05 --to 2024-06-05
+  python scripts/check_est_vs_actual.py
+  python scripts/check_est_vs_actual.py --from 2024-02-05 --to 2024-06-05
 """
 from __future__ import annotations
 
@@ -16,7 +14,7 @@ import sys
 from datetime import datetime
 
 if __name__ == "__main__":
-    _root = os.path.dirname(os.path.abspath(__file__))
+    _root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     if _root not in sys.path:
         sys.path.insert(0, _root)
 try:
@@ -25,9 +23,9 @@ try:
 except ImportError:
     pass
 
-from config import InfluxConfig
-from app_settings import DEFAULT_K
-from full_cleaning_pipeline import run_pipeline
+from gas_usage.config import InfluxConfig
+from gas_usage.app_settings import DEFAULT_K
+from gas_usage.full_cleaning_pipeline import run_pipeline
 
 
 # Time periods for multi-period % error comparison (1 month, 3 months, 5 months, 7 months)

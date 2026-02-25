@@ -7,10 +7,10 @@ from typing import Optional, Tuple
 
 import pandas as pd
 
-from config import InfluxConfig
-from full_cleaning_pipeline import run_pipeline
-from influx_queries import fetch_all_series, query_energy_gas_raw
-from processing import calibrate_k, filter_working_time, hourly_for_calibration
+from .config import InfluxConfig
+from .full_cleaning_pipeline import run_pipeline
+from .influx_queries import fetch_all_series, query_energy_gas_raw
+from .processing import calibrate_k, filter_working_time, hourly_for_calibration
 
 
 def run_find_k(

@@ -17,8 +17,18 @@ streamlit run app.py
 Or run on port 8502:
 
 ```bash
-python run.py
+python scripts/run.py
 ```
+
+---
+
+## Layout
+
+| Path | Purpose |
+|------|--------|
+| **app.py** | Streamlit app (single entry at root). |
+| **gas_usage/** | Config, pipelines, Influx queries, processing. |
+| **scripts/** | `run.py` (launch app on 8502), `check_est_vs_actual.py`, `influx_gas_check.py`. |
 
 ---
 
@@ -37,7 +47,7 @@ python run.py
 |-------|------|
 | **App** | Connection expander: InfluxDB host, port, database, RP, SSL. |
 | **Env** | `INFLUXDB_HOST`, `INFLUXDB_PORT`, `INFLUXDB_DATABASE`, `INFLUXDB_RETENTION_POLICY`, `INFLUXDB_SSL`. |
-| **app_settings.py** | `APP_VERSION`, `DEFAULT_K`, `DEFAULT_GAS_PRICE_EUR_PER_M3`, `CALIBRATION_START_DATE`, `CALIBRATION_END_DATE`. |
+| **gas_usage/app_settings.py** | `APP_VERSION`, `DEFAULT_K`, `DEFAULT_GAS_PRICE_EUR_PER_M3`, `CALIBRATION_START_DATE`, `CALIBRATION_END_DATE`. |
 
 ---
 

@@ -12,8 +12,8 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 
-from config import InfluxConfig
-from influx_queries import fetch_pipeline_1m, query_energy_gas_raw
+from .config import InfluxConfig
+from .influx_queries import fetch_pipeline_1m, query_energy_gas_raw
 
 logger = logging.getLogger(__name__)
 
