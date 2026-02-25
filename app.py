@@ -51,9 +51,6 @@ if "fetch_stats" not in st.session_state:
 if "gas_price" not in st.session_state:
     st.session_state["gas_price"] = DEFAULT_GAS_PRICE_EUR_PER_M3
 
-if "calibration_metrics" in st.session_state and "k" in st.session_state:
-    st.session_state["k_input"] = st.session_state["k"]
-
 
 def get_influx_config() -> InfluxConfig:
     return InfluxConfig(

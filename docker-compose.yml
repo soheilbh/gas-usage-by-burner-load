@@ -1,0 +1,19 @@
+# Single stack for Portainer: Gas usage from burner load (Streamlit)
+# Deploy as stack; set INFLUXDB_* in Portainer stack env or add .env in stack path.
+
+services:
+  app:
+    image: gas-usage-app:latest
+    build: .
+    container_name: gas-usage-app
+    ports:
+      - "8501:8501"
+    environment:
+      - INFLUXDB_HOST=${INFLUXDB_HOST:-localhost}
+      - INFLUXDB_PORT=${INFLUXDB_PORT:-8087}
+      - INFLUXDB_DATABASE=${INFLUXDB_DATABASE:-farmsum_db}
+      - INFLUXDB_RETENTION_POLICY=${INFLUXDB_RETENTION_POLICY:-autogen}
+      - INFLUXDB_USERNAME=${INFLUXDB_USERNAME:-}
+      - INFLUXDB_PASSWORD=${INFLUXDB_PASSWORD:-}
+      - INFLUXDB_SSL=${INFLUXDB_SSL:-false}
+    restart: unless-stopped
