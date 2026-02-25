@@ -27,7 +27,12 @@ from gas_usage.app_settings import (
 from gas_usage.find_k_pipeline import run_find_k
 from gas_usage.full_cleaning_pipeline import run_pipeline
 from gas_usage.processing import apply_gas_model
-from gas_usage.user_prefs import get_effective_default_k, save_default_k
+from gas_usage.user_prefs import (
+    get_effective_default_gas_price,
+    get_effective_default_k,
+    save_default_gas_price,
+    save_default_k,
+)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -49,7 +54,7 @@ if "cleaning_stats" not in st.session_state:
 if "fetch_stats" not in st.session_state:
     st.session_state["fetch_stats"] = {}
 if "gas_price" not in st.session_state:
-    st.session_state["gas_price"] = DEFAULT_GAS_PRICE_EUR_PER_M3
+    st.session_state["gas_price"] = get_effective_default_gas_price(_APP_ROOT, DEFAULT_GAS_PRICE_EUR_PER_M3)
 
 
 def get_influx_config() -> InfluxConfig:
@@ -93,6 +98,10 @@ def run_query():
     st.session_state["result_query_start"] = start
     st.session_state["result_query_end"] = end
     st.session_state["calibration_expander_expanded"] = False
+    # If gas price differs from default, offer to save it
+    default_gp = get_effective_default_gas_price(_APP_ROOT, DEFAULT_GAS_PRICE_EUR_PER_M3)
+    if abs(gas_price - default_gp) > 1e-6:
+        st.session_state["gas_price_offer_save_default"] = True
 
 
 def run_calibrate(cal_start, cal_end):
@@ -132,6 +141,26 @@ def _parse_date(s: str):
         return datetime.strptime(s.strip(), "%Y-%m-%d").date()
     except ValueError:
         return None
+
+
+@st.dialog("Save gas price as default?", width="small")
+def save_gas_price_default_dialog():
+    """Ask user whether to persist the current gas price as default for new sessions."""
+    gas_price = st.session_state.get("gas_price", 0.0)
+    st.markdown(f"Current gas price: **{gas_price:.2f} €/m³**")
+    st.caption("Save this as the default for new sessions?")
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("Yes, save as default", type="primary", key="save_gas_yes", use_container_width=True):
+            if save_default_gas_price(_APP_ROOT, gas_price):
+                st.session_state.pop("gas_price_offer_save_default", None)
+                st.rerun()
+            else:
+                st.error("Could not save (check write permission for data/).")
+    with col2:
+        if st.button("No", key="save_gas_no", use_container_width=True):
+            st.session_state.pop("gas_price_offer_save_default", None)
+            st.rerun()
 
 
 @st.dialog("Save as default?", width="small")
@@ -245,7 +274,9 @@ with tool4:
     st.markdown("**Actions**")
     if st.button("Run", type="primary", use_container_width=True):
         run_query()
-    if st.session_state.get("calibration_offer_save_default"):
+    if st.session_state.get("gas_price_offer_save_default"):
+        save_gas_price_default_dialog()
+    elif st.session_state.get("calibration_offer_save_default"):
         save_default_dialog()
     elif st.button("Calibrate k", use_container_width=True):
         calibrate_dialog()
