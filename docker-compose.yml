@@ -7,7 +7,7 @@ services:
     build: .
     container_name: gas-usage-app
     ports:
-      - "8501:8501"
+      - "8090:8501"
     environment:
       - INFLUXDB_HOST=${INFLUXDB_HOST:-localhost}
       - INFLUXDB_PORT=${INFLUXDB_PORT:-8087}
